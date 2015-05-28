@@ -1,8 +1,9 @@
 function getNotificationHTML(model) {
 	return 	'<div data-read-url="' + model.url + '" data-id="' + model.id + '" class="notification group">' +
-			'<h4>' + model.title + '</h4>' +
-			'<p>' + model.body + '</p>' +
-			'<span class="date">' + model.date + '</span>' +
+			'<h4 id="tagline">' + model.title +
+			'<div class="date">' + model.date + '</div>' +
+			'</h4>' +
+			'<div class="body">' + model.body + '</div>' +
 			'</div>';
 }
 
@@ -35,9 +36,9 @@ function displayNotifications(notifications) {
             
                 // Comment Reply
                 viewModel.id = item.data.name;
-                viewModel.title = '<strong>' + item.data.author + '</strong> replied in <strong>' + truncate(item.data.link_title,40) + '</strong>';
+                viewModel.title = '<span class="author">' + item.data.author + '</span> replied in <span class="subjectLine" id="title">' + truncate(item.data.link_title,60) + '</span>';
                 viewModel.url = "http://www.reddit.com" + item.data.context;
-                viewModel.body = truncate(item.data.body, 128);
+                viewModel.body = truncate(item.data.body, 256);
                 viewModel.date = moment(item.data.created_utc, 'X').fromNow();
 
             } else if(item.kind == 't4'){
@@ -45,16 +46,16 @@ function displayNotifications(notifications) {
                 // Private Message
                 viewModel.id = item.data.name;
                 viewModel.url = "http://www.reddit.com/message/messages/"+ item.data.id;
-                viewModel.title = '<strong>' + item.data.author + '</strong> messaged you <strong>' + truncate(item.data.subject,40) + '</strong>';
-                viewModel.body = truncate(item.data.body,128);
+                viewModel.title = '<span class="author">' + item.data.author + '</span> messaged you <span class="subjectLine" id="subject">' + truncate(item.data.subject,60) + '</span>';
+                viewModel.body = truncate(item.data.body,256);
                 viewModel.date = moment(item.data.created_utc, 'X').fromNow();
             } else {
             
                 // Other
                 viewModel.id = item.data.name;
                 viewModel.url ="http://www.reddit.com/message/unread";
-                viewModel.title = '<strong>' + truncate(item.data.subject?item.data.subject:'New Message',40) + '</strong>';
-                viewModel.body = truncate(item.data.body? item.data.body: '', 128);
+                viewModel.title = '<div>' + truncate(item.data.subject?item.data.subject:'New Message',60) + '</div>';
+                viewModel.body = truncate(item.data.body? item.data.body: '', 256);
                 viewModel.date = moment(item.data.created_utc, 'X').fromNow();
             }
 
@@ -99,7 +100,7 @@ function truncate(text,length){
 			var lastSpace = text.lastIndexOf(" ");
 			text = text.substring(0, lastSpace);
 		}
-		text += "...";
+		text += '<span id="truncate">[...]</span>';
 	}
 
 	return text;
@@ -160,7 +161,9 @@ $(document).ready(function() {
 	$(".openOptions").click(function() {
 		chrome.tabs.create({url: 'options.html'});
 	});
-
+	$(".openReddit").click(function() {
+		chrome.tabs.create({url: 'https://reddit.com/message/inbox/'});
+	});
 
   $(".forceRefresh").click(function() {
     $('.forceRefresh').addClass('fa-spin');
